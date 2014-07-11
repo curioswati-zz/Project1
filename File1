@@ -3,16 +3,16 @@ import nltk,urllib,os
 #returns the first url found on the input page.
 def get_next(page):
     print "entered get_next"
-    flag = 0
+    #flag = 0
     start_link = page.find('<a class="reference external" href=')
     if start_link == -1:
-        flag = 1
-        start_link = page.find('<a href=')
-        if start_link == -1:
-            return None,0
-    if not flag:
-        start_link = page.find('"',start_link+1)
-        start_link = page.find('"',start_link+1)
+        #flag = 1
+        #start_link = page.find('<a href=')
+        #if start_link == -1:
+        return None,0
+    #if not flag:
+    start_link = page.find('"',start_link+1)
+    start_link = page.find('"',start_link+1)
     start_quote = page.find('"',start_link+1)
     end_quote = page.find('"',start_quote+1)
     url = page[start_quote+1:end_quote]
@@ -44,47 +44,36 @@ def get_page(page):
     return urllib.urlopen(page).read()
 
 #extracts the text content of the input page and saves in a text file on system.
-def extract_page(page,i,dir_):
-    print "entered extract_page"
-    html = get_page(page)
-    raw = nltk.clean_html(html)
-    filename = "FILE"+str(i)+".txt"
-    i+=1
-    filename = dir_+"/"+filename
-    f= open(filename,"w")
-    f.write(raw)
-    f.close()
+def extract_page(page,path,name):
+    os.chdir(path)
+    os.system(r'C:\"Program Files (x86)"\GNUWin32\bin\wget -O'+' '+name+' '+url)
 
 #the main module.    
 def get_all_pages(page,dir_):
     print "entered get_all_pages"
-    extract_page(page,0,dir_)
+    extract_page(page,dir_,"FILE0.html")
     links = get_all_links(get_page(page))
     i=1
+    f_name = "FILE"+str(i)+".html"
     crawled = []
     for entry in links:
         print entry
         if entry not in crawled:
             crawled.append(entry)
             url = page+entry
-            extract_page(url,i,dir_)
+            extract_page(url,dir_,f_name)
             i+=1
+            f_name = "FILE"+str(i)+".html"
             union(links,get_all_links(get_page(url)))
         
 #creates a directory in the python dir of your system and return the name of directory
-def create_dir(url):
-    if url == "http://learnpythonthehardway.org/book/":
-        dir_ = "python"
-    elif url == "http://c.learncodethehardway.org/book/":
-        dir_ = "C"
-    else:
-        dir_ = url[7:10]
-    if not os.path.isdir(dir_):
-            os.mkdir("C:/Python27/"+dir_)
-    return dir_        
+def create_dir(path):
+    if not os.path.isdir(path):
+            os.mkdir(path)
 
 url = raw_input("Enter url: ")
+path = raw_input("Enter the directory path in which you want to save files: ")
 if url[-1] != "/":
     url+="/"
-dir_ = create_dir(url)
-get_all_pages(url,dir_)
+create_dir(path)
+get_all_pages(url,path)
